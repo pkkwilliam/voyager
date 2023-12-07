@@ -5,7 +5,6 @@ import mo.bitcode.kyrie.service.auth.KyrieAuthServiceTemplate;
 import mo.bitcode.kyrie.service.user_profile.KyrieUserProfileService;
 import mo.bitcode.kyrie.service.user_profile.model.KyrieUserProfile;
 import mo.bitcode.sms.provider.SmsProviderService;
-import mo.bitcode.sms.repository.PoormanVerificationJpaRepository;
 import mo.bitcode.sms.repository.PoormanVerificationRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
