@@ -13,6 +13,7 @@ public class KyrieAuthServiceTemplate extends SmsAuthServicePoormanVerificationT
 
   public KyrieAuthServiceTemplate(JwtService<KyrieUserProfile> jwtService, boolean mockSmsService, SmsProviderService smsProviderService, KyrieUserProfileService kyrieUserProfileService, PoormanVerificationRepository poormanVerificationRepository) {
     super(jwtService, mockSmsService, smsProviderService, kyrieUserProfileService, poormanVerificationRepository);
+    this.kyrieUserProfileService = kyrieUserProfileService;
   }
 
   @Override

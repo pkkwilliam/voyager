@@ -7,8 +7,7 @@ import lombok.NoArgsConstructor;
 import mo.bitcode.kyrie.common.model.KyrieTableBase;
 import mo.bitcode.kyrie.service.user_profile.model.KyrieUserProfile;
 
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.List;
 
 @Builder
@@ -21,7 +20,7 @@ public class Team extends KyrieTableBase {
   private int rating;
   private int season;
   private TeamType teamType;
-  @OneToMany
+  @OneToMany(cascade = CascadeType.REFRESH)
   private List<KyrieUserProfile> userProfiles;
 
 }

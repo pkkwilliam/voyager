@@ -30,17 +30,17 @@
 		<dependency>
 			<groupId>mo.bitcode</groupId>
 			<artifactId>bedrock-core</artifactId>
-			<version>0.0.11-SNAPSHOT</version>
+			<version>0.0.12-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>mo.bitcode</groupId>
 			<artifactId>sms-service</artifactId>
-			<version>0.0.11-SNAPSHOT</version>
+			<version>0.0.12-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>mo.bitcode</groupId>
 			<artifactId>map</artifactId>
-			<version>0.0.11-SNAPSHOT</version>
+			<version>0.0.12-SNAPSHOT</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
 		<dependency>

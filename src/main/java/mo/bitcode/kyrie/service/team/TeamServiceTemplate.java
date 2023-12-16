@@ -1,27 +1,29 @@
 package mo.bitcode.kyrie.service.team;
 
-import mo.bitcode.core.service.rest_template.query.AbstractQueryServiceRepository;
 import mo.bitcode.core.service.rest_template.query.AbstractQueryServiceTemplate;
+import mo.bitcode.kyrie.service.application_config.ApplicationConfigService;
+import mo.bitcode.kyrie.service.application_config.model.ApplicationConfig;
 import mo.bitcode.kyrie.service.team.model.Team;
 import mo.bitcode.kyrie.service.team.model.TeamQueryRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;
 
-public abstract class TeamServiceTemplate extends AbstractQueryServiceTemplate<Team, TeamQueryRequest> implements TeamService{
+public abstract class TeamServiceTemplate extends AbstractQueryServiceTemplate<Team, TeamQueryRequest> implements TeamService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TeamServiceTemplate.class);
-  private static final int CREATE_TEAM_RATING = 0;
-  private static final int CREATE_TEAM_SEASON = 1;
+  private ApplicationConfigService applicationConfigService;
 
-  public TeamServiceTemplate(AbstractQueryServiceRepository<Team> abstractQueryServiceRepository) {
-    super(abstractQueryServiceRepository);
+  public TeamServiceTemplate(ApplicationConfigService applicationConfigService, TeamRepository teamRepository) {
+    super(teamRepository);
+    this.applicationConfigService = applicationConfigService;
   }
 
   @Override
   public Team create(Team requestChild) {
-    requestChild.setRating(CREATE_TEAM_RATING);
-    requestChild.setSeason(CREATE_TEAM_SEASON);
+    final ApplicationConfig applicationConfig = this.applicationConfigService.getApplicationConfig();
+    requestChild.setRating(applicationConfig.getTeamConfig().getCreateTeamDefaultRating());
+    requestChild.setSeason(applicationConfig.getSeason());
     return super.create(requestChild);
   }
 

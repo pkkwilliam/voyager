@@ -43,7 +43,7 @@ public abstract class KyrieUserProfileServiceTemplate
             .teamType(TeamType.ONE_VS_ONE)
             .userProfiles(List.of(kyrieUserProfile))
             .build();
-    this.teamService.create(oneVsOneTeam);
+    final Team persistedTeam = this.teamService.create(oneVsOneTeam);
     return kyrieUserProfile;
   }
 

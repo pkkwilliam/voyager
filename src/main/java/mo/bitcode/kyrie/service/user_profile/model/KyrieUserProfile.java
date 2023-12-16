@@ -6,6 +6,6 @@ import mo.bitcode.core.security.model.UserRole;
 import javax.persistence.Entity;
 
 @Entity
-public class KyrieUserProfile extends UserProfile<KyrieUserProfile, UserRole> {
+public class KyrieUserProfile extends UserProfile<UserRole> {
 
 }
