@@ -16,6 +16,7 @@ import javax.persistence.OneToOne;
 @AllArgsConstructor
 public class Game extends KyrieTableBase {
 
+  private GameStatus gameStatus;
   @OneToOne
   private Team team1;
   @OneToOne

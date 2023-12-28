@@ -1,73 +1,75 @@
 package mo.bitcode.kyrie.service.game;
 
-import mo.bitcode.core.service.rest_template.query.AbstractQueryServiceRepository;
 import mo.bitcode.core.service.rest_template.query.AbstractQueryServiceTemplate;
 import mo.bitcode.kyrie.common.exception.KyrieException;
 import mo.bitcode.kyrie.common.exception.KyrieExceptionCode;
-import mo.bitcode.kyrie.service.GamePoolService;
 import mo.bitcode.kyrie.service.game.model.Game;
 import mo.bitcode.kyrie.service.game.model.GameQueryRequest;
-import mo.bitcode.kyrie.service.notify.NotifyService;
-import mo.bitcode.kyrie.service.rating.RatingService;
+import mo.bitcode.kyrie.service.pool.PoolService;
+import mo.bitcode.kyrie.service.pool.confirming_game.ConfirmingGamePoolService;
+import mo.bitcode.kyrie.service.pool.find_match.FindMatchPoolService;
+import mo.bitcode.kyrie.service.pool.find_match.model.FindMatch;
+import mo.bitcode.kyrie.service.pool.on_going_game.OnGoingGamePoolService;
+import mo.bitcode.kyrie.service.pool.on_going_game.model.TeamAssertResult;
 import mo.bitcode.kyrie.service.team.model.Team;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.data.jpa.domain.Specification;
 
-@Service
-public abstract class GameTemplate extends AbstractQueryServiceTemplate<Game, GameQueryRequest> implements GameService {
+public class GameTemplate extends AbstractQueryServiceTemplate<Game, GameQueryRequest> implements GameService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GameTemplate.class);
 
-  private GamePoolService gamePoolService;
-  private NotifyService notifyService;
-  private RatingService ratingService;
+  private FindMatchPoolService findMatchPoolService;
+  private ConfirmingGamePoolService confirmingGamePoolService;
+  private OnGoingGamePoolService onGoingGamePoolService;
 
-  public GameTemplate(AbstractQueryServiceRepository<Game> abstractQueryServiceRepository,
-                      GamePoolService gamePoolService,
-                      NotifyService notifyService,
-                      RatingService ratingService) {
-    super(abstractQueryServiceRepository);
-    this.gamePoolService = gamePoolService;
-    this.notifyService = notifyService;
-    this.ratingService = ratingService;
+  public GameTemplate(GameRepository gameRepository,
+                      int queryRequestSize,
+                      FindMatchPoolService findMatchPoolService,
+                      ConfirmingGamePoolService confirmingGamePoolService,
+                      OnGoingGamePoolService onGoingGamePoolService) {
+    super(gameRepository, queryRequestSize);
+    this.findMatchPoolService = findMatchPoolService;
+    this.confirmingGamePoolService = confirmingGamePoolService;
+    this.onGoingGamePoolService = onGoingGamePoolService;
   }
 
-  protected abstract boolean isTeamInAnyPool(Team team);
-  protected abstract Game match(Team team);
+  @Override
+  public void findMatch(Team team, long latitude, long longitude) {
+    final FindMatch findMatch = new FindMatch(team);
+    findMatch.setLatitude(latitude);
+    findMatch.setLongitude(longitude);
+    this.findMatchPoolService.enter(findMatch);
+  }
 
   @Override
-  public void findMatch(Team team) {
-    if (isTeamInAnyPool(team)) {
-      throw new KyrieException(KyrieExceptionCode.TEAM_NOT_ALLOW_TO_ENTER_POOL);
+  public void startMatch(Team team) {
+    this.validateTeamInPool(confirmingGamePoolService, team);
+    this.confirmingGamePoolService.teamConfirm(team);
+  }
+
+  @Override
+  public void endMatch(TeamAssertResult teamAssertResult) {
+    this.validateTeamInPool(onGoingGamePoolService, teamAssertResult.getTeam());
+    this.onGoingGamePoolService.teamAssertGameEnd(teamAssertResult);
+  }
+
+  private void validateTeamInPool(PoolService poolService, Team team) {
+    final boolean teamInPool = poolService.teamInPool(team);
+    if (!teamInPool) {
+      throw new KyrieException(KyrieExceptionCode.TEAM_NOT_IN_POOL);
     }
-    final Game game = this.match(team);
-    if (game == null) {
-      this.gamePoolService.addTeamToFindMatchPool(team);
-      return;
-    }
-    final Team priorEnterTeam = game.getTeam1();
-    this.gamePoolService.removeTeamFromFindMatchPool(priorEnterTeam);
-    this.gamePoolService.addGameToReadyPool(game);
-    this.notifyService.notifyGameReady(game);
   }
 
   @Override
-  public void startMatch(Game game) {
-    this.gamePoolService.removeGameFromReadyPool(game);
-    this.gamePoolService.addGameToProcessingPool(game);
-    this.notifyService.notifyStartGame(game);
-  }
-
-  @Override
-  public void endMatch(Game game) {
-    this.gamePoolService.removeGameFromProcessingPool(game);
-    this.ratingService.updateTeamRating(game);
-    this.create(game);
+  protected Specification<Game> generateBasicSpecification(GameQueryRequest gameQueryRequest) {
+    return Specification.where(this.isActive(true));
   }
 
   @Override
   protected Logger getLogger() {
     return LOGGER;
   }
+
 }
