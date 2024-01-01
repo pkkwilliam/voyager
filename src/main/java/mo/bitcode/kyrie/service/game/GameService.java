@@ -3,14 +3,16 @@ package mo.bitcode.kyrie.service.game;
 import mo.bitcode.core.service.rest_template.Service;
 import mo.bitcode.kyrie.service.game.model.Game;
 import mo.bitcode.kyrie.service.pool.on_going_game.model.TeamAssertResult;
-import mo.bitcode.kyrie.service.team.model.Team;
+import org.springframework.data.domain.Page;
 
 public interface GameService extends Service<Game> {
 
-  void findMatch(Team team, long latitude, long longitude);
+  Page<Game> getByTeamId(long teamId, int pageRequest);
 
-  void startMatch(Team team);
+  void findGame(long teamId, long latitude, long longitude);
 
-  void endMatch(TeamAssertResult teamAssertResult);
+  void startGame(long teamId);
+
+  void endGame(TeamAssertResult teamAssertResult);
 
 }
